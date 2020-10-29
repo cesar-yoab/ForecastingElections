@@ -1,0 +1,28 @@
+---
+title: "FORECASTING THE 2020 US PRESIDENTIAL ELECTIONS."
+author: "Cesar Y. Villarreal Guzman"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: pdf_document
+abstract: |
+  In this paper we estimate Joe Biden to win the majority of votes for the 
+  2020 presidential election.
+  **Keywords:** Forecasting; US 2020 Election; Multilevel Regression with Post-Stratification
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+# Data
+
+# Model
+
+# Results
+
+# Discussion
+
+\pagebreak
+
+# References
