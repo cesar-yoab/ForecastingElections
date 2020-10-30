@@ -28,26 +28,27 @@ data$hispanic <- data$hispanic %>%
 # Third model had 70 divergent transitions
 # Fourth model ...
 
-# Model 2 training
+#### Model ####
+# Basic MR Model
 model <- brm(vote_2020 ~ age + gender + hispanic + race_ethnicity + state,
              data = data, 
              family = bernoulli(),
-             file = './scripts/fourth_model',
+             file = './scripts/models/basic_bayes_model',
              iter = 4000)
 
-# Model 4 training
-model <- brm(vote_2020 ~ age + gender + hispanic + race_ethnicity + (1|state),
+# Model intercept on each state
+model.int <- brm(vote_2020 ~ age + gender + hispanic + race_ethnicity + (1|state),
              data = data, 
              family = bernoulli(),
-             file = './scripts/fourth_model',
+             file = './scripts/models/sate_int_model',
              iter = 4000)
 
-# Second model
-model <- read_rds('./scripts/second_model.rds')
+# Load the model
+model <- read_rds('./scripts/models/fourth_model.rds')
 
 summary(model)
 
-# Import post-strat data
+# Import post stratification data
 post.strat <- read.csv('post-strat.csv')
 
 # Convert to binary gender and hispanic
@@ -59,8 +60,12 @@ post.strat$hispanic <- post.strat$hispanic %>%
   mapvalues(from = c("Hispanic", "Not Hispanic"),
             to = c(1, 0))
 
-post.strat$race_ethnicity <- post.strat$race_ethnicity %>%
-  mapvalues(from = c('Other'), to = c('Some other race'))
+
+## Setting cell counts for pos-stratification
+cell_counts <- post.strat %>% 
+  group_by(gender, age, race_ethnicity, hispanic, state) %>% 
+  summarise(n = sum(perwt)) %>% 
+  
 
 
 

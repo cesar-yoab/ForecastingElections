@@ -2,6 +2,10 @@ import os
 import click
 import pandas as pd
 
+# Some copy warnings for the pandas data frame
+import warnings
+warnings.filterwarnings('ignore')
+
 US_STATE_CODES = {
     'Alabama': 'AL',
     'Alaska': 'AK',
@@ -119,12 +123,28 @@ def finish_clean(df):
     # Filtering age
     filter = (df['AGE'] >= 18) & (df['AGE'] <= 93)
 
-    return df[filter]
+    df = df[filter]
+
+    # Create age groups
+    age_groups = [18, 30, 40, 50, 60, 70, 80, 93]
+    age_labs = ['18-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-93']
+
+    df['AGE'] = pd.cut(df['AGE'], age_groups, labels=age_labs)
+
+    return df
 
 
-def main():
-    """Main driver code"""
-    post_strat = pd.read_csv('data/usa_00002.csv')
+@click.command()
+@click.option('--data', help='Relative or full path for the ipsum data set')
+@click.option('--csv-name', default='post-strat.csv', help='Name for the csv file to be created')
+def main(data, csv_name):
+    """Cleaning script for the IPUMS data set.
+
+        WARNING: This data set should follow the selection guidelines
+            outlined in the README. Unexpected behaviour is to be expected
+            if they are not followed.
+    """
+    post_strat = pd.read_csv(data)
 
     # Only select wanted columns
     cols = ['SEX', 'AGE', 'RACE', 'HISPAN', 'STATEICP']

@@ -8,8 +8,7 @@ FEATURES_OF_INTEREST = ['age', 'gender', 'hispanic',
                         'race_ethnicity', 'state', 'education']
 
 
-def clean_downloaded_data(dirpath, filepath,
-                          csvname='survey-data.csv'):
+def clean_downloaded_data(dirpath, csvname):
     """
     TODO: Add more here 
     """
@@ -25,8 +24,13 @@ def clean_downloaded_data(dirpath, filepath,
 
 def get_path_to_phase2(dirpath):
     """Returns full path to phase 2 study directory."""
-    PATH = path.join(dirpath, 'Nationscape-DataRelease_WeeklyMaterials_DTA')
-    dirs = [f[0] for f in walk(PATH)]
+    if not 'Nationscape-DataRelease_WeeklyMaterials_DTA' in dirpath:
+        PATH = path.join(
+            dirpath, 'Nationscape-DataRelease_WeeklyMaterials_DTA')
+    else:
+        PATH = dirpath
+
+    dirs = [f[0] for f in walk(dirpath)]
     # Refer to function list_files
 
     for f in dirs:
@@ -118,6 +122,12 @@ def _raw_clean_data(survey):
     # From this point on we represent a Biden vote as a 1 and a trump vote as a 0
     survey.replace({'Joe Biden': 1, 'Donald Trump': 0}, inplace=True)
 
+    # Create age groups
+    age_groups = [18, 30, 40, 50, 60, 70, 80, 93]
+    age_labs = ['18-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-93']
+
+    survey['age'] = pd.cut(survey['age'], age_groups, labels=age_labs)
+
     # Replace Hispanic values for hispanic or not
     rmp = {k: 'Hispanic' for k in set(
         survey['hispanic']) if k != 'Not Hispanic'}
@@ -138,10 +148,16 @@ def _raw_clean_data(survey):
     return survey.loc[(survey['vote_2020'] == 0) | (survey['vote_2020'] == 1)]
 
 
-def main(unzip, filepath, dirpath):
+@click.command()
+@click.option('--unzip/--no-unzip', default=False)
+@click.option('--csv-name', default='survey-data.csv')
+@click.option('--data', help='Relative or full path of folder containing data')
+def main(unzip, csv_name, data):
     """Script to clean and in unzip data after download"""
     if unzip:
-        extract_data(filepath, dirpath)
+        extract_data(data, './data')
+
+    clean_downloaded_data(data, csv_name)
 
 
 if __name__ == '__main__':
