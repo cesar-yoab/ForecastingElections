@@ -1025,3 +1025,6 @@ cython_debug/
 
 # Test models
 scripts/models/fourth_model.rds
+
+# No csv files
+*.csv
