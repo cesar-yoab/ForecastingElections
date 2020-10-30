@@ -8,6 +8,7 @@
 library(tidyverse)
 library(plyr)
 library(brms)
+library(tidybayes)
 
 #### Survey Data Cleaning ####
 data <- read.csv('./data/survey-data.csv')
@@ -45,3 +46,23 @@ model <- brm(vote_2020 ~ age + gender + hispanic + race_ethnicity + (1|state),
 model <- read_rds('./scripts/second_model.rds')
 
 summary(model)
+
+# Import post-strat data
+post.strat <- read.csv('post-strat.csv')
+
+# Convert to binary gender and hispanic
+post.strat$gender <- post.strat$gender %>%
+  mapvalues(from = c("Female", "Male"),
+            to = c(0, 1))
+
+post.strat$hispanic <- post.strat$hispanic %>%
+  mapvalues(from = c("Hispanic", "Not Hispanic"),
+            to = c(1, 0))
+
+post.strat$race_ethnicity <- post.strat$race_ethnicity %>%
+  mapvalues(from = c('Other'), to = c('Some other race'))
+
+
+
+summary(post.strat)
+summary(data)

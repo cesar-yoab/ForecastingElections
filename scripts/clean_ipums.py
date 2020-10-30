@@ -103,7 +103,7 @@ def finish_clean(df):
         'Other Asian or Pacific Islander': 'Pacific',
         'Japanese': 'Asian',
         'Chinese': 'Asian',
-        'Other race, nec': 'Other',
+        'Other race, nec': 'Some other race',
         'Two major races': 'Other',
         'Three or more major races': 'Other'
     }
@@ -126,6 +126,11 @@ def main():
     """Main driver code"""
     post_strat = pd.read_csv('data/usa_00002.csv')
 
+    # Only select wanted columns
+    cols = ['SEX', 'AGE', 'RACE', 'HISPAN', 'STATEICP']
+    post_strat = post_strat[cols]
+
+    # Get code values from .txt file and clean columns
     lines = get_keys()
 
     to_clean = ['STATEICP', 'SEX', 'RACE', 'HISPAN']
@@ -133,8 +138,20 @@ def main():
     for i, col in enumerate(to_clean):
         clean_col(post_strat, col, lines[i])
 
+    # Apply binning as in the survey data set
     post_strat = finish_clean(post_strat)
 
+    # Rename columns
+    col_names = {
+        'SEX': 'gender',
+        'AGE': 'age',
+        'RACE': 'race_ethnicity',
+        'HISPAN': 'hispanic',
+        'STATEICP': 'state'
+    }
+    post_strat = post_strat.rename(col_names, axis='columns')
+
+    # Save as a csv file
     post_strat.to_csv('post-strat.csv')
 
 
