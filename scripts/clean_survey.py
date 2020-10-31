@@ -15,6 +15,10 @@ def clean_downloaded_data(dirpath, csvname):
     # Create data frame
     df = create_df(dirpath)
 
+    if isinstance(df, dict):
+        print("An unexpected error ocurred please re-check your input and data!")
+        return
+
     # Clean data
     df = _raw_clean_data(df)
 

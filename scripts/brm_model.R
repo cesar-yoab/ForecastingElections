@@ -44,30 +44,67 @@ model.int <- brm(vote_2020 ~ age + gender + hispanic + race_ethnicity + (1|state
              iter = 4000)
 
 # Load the model
-model <- read_rds('./scripts/models/fourth_model.rds')
+model <- read_rds('./scripts/models/sate_int_model.rds')
 
 summary(model)
 
+
+#### Preparing Post Stratification ####
 # Import post stratification data
 post.strat <- read.csv('post-strat.csv')
 
 # Convert to binary gender and hispanic
 post.strat$gender <- post.strat$gender %>%
-  mapvalues(from = c("Female", "Male"),
+  plyr::mapvalues(from = c("Female", "Male"),
             to = c(0, 1))
 
 post.strat$hispanic <- post.strat$hispanic %>%
-  mapvalues(from = c("Hispanic", "Not Hispanic"),
+  plyr::mapvalues(from = c("Hispanic", "Not Hispanic"),
             to = c(1, 0))
 
-
-## Setting cell counts for pos-stratification
 cell_counts <- post.strat %>% 
-  group_by(gender, age, race_ethnicity, hispanic, state) %>% 
-  summarise(n = sum(perwt)) %>% 
-  
+  dplyr::group_by(age, gender, race_ethnicity, state, hispanic) %>% 
+  dplyr::summarise(n = sum(perwt)) %>% ungroup()
+
+# Proportion stuff
+state_prop <- cell_counts %>% 
+  dplyr::group_by(state) %>% 
+  dplyr::mutate(satate_prop = n/sum(n)) %>% 
+  dplyr::ungroup()
 
 
+#### Generating Predictions ####
+results.state <- model %>% 
+  add_predicted_draws(newdata = state_prop) %>% 
+  rename(vote_predictions = .prediction)
 
-summary(post.strat)
-summary(data)
+results.state <- results.state %>%
+  mutate(vote_predictions_prop = vote_predictions*satate_prop) %>% 
+  group_by(state, .draw) %>% 
+  summarise(vote_predictions = sum(vote_predictions_prop)) %>% 
+  group_by(state) %>% 
+  summarise(mean = mean(vote_predictions),
+            lower = quantile(vote_predictions, 0.025),
+            upper = quantile(vote_predictions, 0.975))
+
+
+# Save our results
+write_csv(results.state, "MRP_Forecast.csv")
+
+# Plot results
+results.state %>% ggplot(aes(y = mean, x = forcats::fct_inorder(state), color="MRP Estimates")) +
+  geom_point() + 
+  geom_errorbar(aes(ymin=lower, ymax=upper), width = 0) + 
+  ylab("Proportion Biden support") + 
+  xlab("State") + 
+  geom_point(data = data %>% 
+               group_by(state, vote_2020) %>% 
+               summarise(n = n()) %>% 
+               group_by(state) %>% 
+               mutate(prop = n / sum(n)) %>% 
+               filter(vote_2020 == 1),
+             aes(state, prop, color = "Raw Data")) + 
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1") + 
+  theme(legend.position = "bottom") +
+  theme(legend.title = element_blank())

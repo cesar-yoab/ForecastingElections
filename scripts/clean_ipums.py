@@ -108,8 +108,8 @@ def finish_clean(df):
         'Japanese': 'Asian',
         'Chinese': 'Asian',
         'Other race, nec': 'Some other race',
-        'Two major races': 'Other',
-        'Three or more major races': 'Other'
+        'Two major races': 'Some other race',
+        'Three or more major races': 'Some other race'
     }
 
     df['RACE'].replace(race, inplace=True)
@@ -131,7 +131,7 @@ def finish_clean(df):
 
     df['AGE'] = pd.cut(df['AGE'], age_groups, labels=age_labs)
 
-    return df
+    return df.dropna()
 
 
 @click.command()
@@ -147,7 +147,7 @@ def main(data, csv_name):
     post_strat = pd.read_csv(data)
 
     # Only select wanted columns
-    cols = ['SEX', 'AGE', 'RACE', 'HISPAN', 'STATEICP']
+    cols = ['PERWT', 'SEX', 'AGE', 'RACE', 'HISPAN', 'STATEICP']
     post_strat = post_strat[cols]
 
     # Get code values from .txt file and clean columns
@@ -167,7 +167,8 @@ def main(data, csv_name):
         'AGE': 'age',
         'RACE': 'race_ethnicity',
         'HISPAN': 'hispanic',
-        'STATEICP': 'state'
+        'STATEICP': 'state',
+        'PERWT': 'perwt'
     }
     post_strat = post_strat.rename(col_names, axis='columns')
 

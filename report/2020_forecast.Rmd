@@ -3,17 +3,26 @@ title: "FORECASTING THE 2020 US PRESIDENTIAL ELECTIONS."
 author: "Cesar Y. Villarreal Guzman"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: pdf_document
+fontsize: 12pt
+sansfont: Calibri Light
+bibliography: references.bib
 abstract: |
   In this paper we estimate Joe Biden to win the majority of votes for the 
   2020 presidential election.
-  **Keywords:** Forecasting; US 2020 Election; Multilevel Regression with Post-Stratification
+  **Keywords:** Forecasting; US 2020 Election; Trump; Biden; Multilevel Regression with Post-Stratification
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse) # Mostly use dplyr and ggplot
+
+mrp.forecast <- read.csv('./data/MRP_Forecast.csv') # MRP forecast
 ```
 
 # Introduction
+
+
 
 # Data
 
@@ -24,5 +33,9 @@ knitr::opts_chunk$set(echo = TRUE)
 # Discussion
 
 \pagebreak
+
+---
+nocite: '@*'
+---
 
 # References
