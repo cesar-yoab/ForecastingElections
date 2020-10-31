@@ -88,9 +88,16 @@ def get_post_strat_table(df):
     return flattened
 
 
-def srp_forecast(table):
+def srp_forecast(table, predictions):
     """TODO: Add description"""
-    pass
+    table['predictions'] = predictions
+    table['predictions_prop'] = table['predictions'] * table['prop']
+
+    N = np.sum(table['perwt'])
+    p = table.groupby('state')['predictions_prop'].sum() * N
+    w = table.groupby('state')['perwt'].sum()
+
+    return p / w
 
 
 @ click.command()

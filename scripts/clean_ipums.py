@@ -6,10 +6,10 @@ import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 
+# https://gist.github.com/rogerallen/1583593
 US_STATE_CODES = {
     'Alabama': 'AL',
     'Alaska': 'AK',
-    'American Samoa': 'AS',
     'Arizona': 'AZ',
     'Arkansas': 'AR',
     'California': 'CA',
@@ -19,7 +19,6 @@ US_STATE_CODES = {
     'District of Columbia': 'DC',
     'Florida': 'FL',
     'Georgia': 'GA',
-    'Guam': 'GU',
     'Hawaii': 'HI',
     'Idaho': 'ID',
     'Illinois': 'IL',
@@ -44,12 +43,10 @@ US_STATE_CODES = {
     'New York': 'NY',
     'North Carolina': 'NC',
     'North Dakota': 'ND',
-    'Northern Mariana Islands': 'MP',
     'Ohio': 'OH',
     'Oklahoma': 'OK',
     'Oregon': 'OR',
     'Pennsylvania': 'PA',
-    'Puerto Rico': 'PR',
     'Rhode Island': 'RI',
     'South Carolina': 'SC',
     'South Dakota': 'SD',
@@ -57,7 +54,6 @@ US_STATE_CODES = {
     'Texas': 'TX',
     'Utah': 'UT',
     'Vermont': 'VT',
-    'Virgin Islands': 'VI',
     'Virginia': 'VA',
     'Washington': 'WA',
     'West Virginia': 'WV',

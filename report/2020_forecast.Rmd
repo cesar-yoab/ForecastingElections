@@ -18,6 +18,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) # Mostly use dplyr and ggplot
 
 mrp.forecast <- read.csv('./data/MRP_Forecast.csv') # MRP forecast
+srp.forecast <- read.csv('../data/spr_forecast.csv')
+#polls <- read.csv('../data/2020_polls.csv')
 ```
 
 # Introduction
