@@ -87,7 +87,6 @@ results.state <- results.state %>%
             lower = quantile(vote_predictions, 0.025),
             upper = quantile(vote_predictions, 0.975))
 
-
 # Save our results
 write_csv(results.state, "MRP_Forecast.csv")
 
