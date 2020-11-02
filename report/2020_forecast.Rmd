@@ -1,5 +1,5 @@
 ---
-title: "MAXIMIZING RETURN AND FORECASTING THE 2020 US PRESIDENTIAL ELECTIONS"
+title: "FORECASTING THE 2020 US PRESIDENTIAL ELECTIONS"
 author: "Cesar Y. Villarreal Guzman"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: pdf_document
@@ -10,28 +10,30 @@ abstract: |
   In this paper develop two models with the purpose of forecasting the 
   2020 United States presidential election. Multilevel regression with 
   postratification (MRP) and Stacked regression with postratification models
-  where constructed using ADDNAME survey data and postsratified using the ACS
-  census dataset. We find that both our models forecast the victory of Joe Biden
-  both in the popular vote and the electoral college vote.
+  where constructed using the Nationscape survey and postsratified using the ACS
+  census dataset. We conclude by forecasting the victory of Joe Biden
+  in the popular vote and commenting on the high likelihood of winning the
+  electoral college process.
   
   **Keywords:** Forecasting; U.S. 2020 Election; Trump; Biden; Multilevel Regression with Poststratification
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 
 library(tidyverse) # Mostly use dplyr and ggplot
+library(urbnmapr) # To plot maps
+library(sf) # Also for map plotting
+library(cowplot)
 
 # Change paths accordingly
 mrp.forecast <- read.csv('../data/MRP_Forecast.csv') # MRP forecast
 srp.forecast <- read.csv('../data/spr_forecast.csv') # SRP forecast
 
-sample <- read.csv('../data/survey-data.csv')
-poststrat <- read.csv('../data/post-strat.csv')
-
-unique(sample$race_ethnicity)
+sample <- read.csv('../data/survey-data.csv') # Nationscape data after cleaning
+poststrat <- read.csv('../data/post-strat.csv') # ACS data after cleaning
 ```
-# 1. Introduction
+# 1 Introduction
 It is a common theme in the social sciences and statistics literature to 
 attempt constructing a model that accurately predicts the outcome of a presidential
 election. Often the purpose of these experiments ranges from finding a novel 
@@ -40,56 +42,56 @@ political level that the expected winner would cause.
 All such experiments, however, share the same underlying problem, predicting
 the outcome of the elections.
 
-@isidore_2020 discusses how the 2020 United States presidential elections are now 
+As Pablo Hiriat writes in his article for "El Financiero", the future of world's politics will be decided on
+November 3rd in the 2020 United States presidential elections.
+@isidore_2020 discusses how the U.S. elections are now 
 the most bet-on event in history. As of Wednesday morning, a week prior to the 
 elections, about $284 million USD had already been wagered on the Betfair Exchange by British bettors.
-Betfair Exchange is one of the largest betting exchanges in the world based on London.
-Moreover, in this article he predicts that by the time the election is held 
-approximately $520 million USD could be wagered.
+Betfair Exchange is one of the largest betting exchanges in the world based on London. The
+author continues by predicting this figure to grow close to $500 million USD.
 
-Gambling and information theory tell us that if we where to know
-for certain the outcome of the 2020 U.S. presidential election we could double,
-our money. It is with this in mind that for this paper we set ourselves the premise 
-of theoretical bet. We attempt to forecast the outcome of 2020 U.S. presidential 
-elections and comment, based on our results, the optimal strategy that would
-maximize the return of the bet i.e. comment on the most likely to win
-candidate.
+It seems now more than ever this years elections carry with
+them greater level of importance, and in this paper we attempt to forecast the
+percentage of popular votes that will appear in the screens of many Americans
+on November 3rd.
+To accomplish this two methods are used, a multilevel regression and poststratification
+(MRP) model and a stacked regression and poststratification model (SRP). To
+fit the models we used the Democracy Fund + UCLA Nationscape survey data set
+and, since this survey is a non-probability sample, to obtain accurate
+estimates we poststratify our predictions using the ACS U.S. census data set. 
 
-Two models are used to forecast, a multilevel regression with poststratification
-(MRP) model and a stacked regression with poststratification model (SRP). To
-train these models we used the Democracy Fund + UCLA Nationscape survey data set
-to construct the models and the ACS U.S. census data set for poststratification.
-
-This paper is structured in the following manner. Section two contains a commentary
-on both data sets, what they are and where they come from. This is followed by
+This paper is structured in the following manner. Section two contains commentary
+on both data sets, what they are and where they come from, here we also 
+explain what is meant by a non-probability sample. This is followed by
 a brief discussion on our data cleaning methodology. In section three we 
-elaborate on how MRP and SRP work and how they are implemented. Section 
-four is where we present our estimates for both models and finally in section
-five we comment on this estimates and argue on the most likely winner of the 
-U.S. presidential election.
+elaborate on how MRP and SRP work and how they are implemented to generate predictions.
+Section four is where we present our estimates for both models and finally in section
+five we comment on this estimates and comment on the most likely winner of the 
+U.S. presidential election, Joe Biden.
 
-# 2. Data
+# 2 Data
 
-## 2.1 Democracy Fund + UCLA Nationscape Data Set
+## 2.1 Democracy Fund + UCLA Nationscape Survey
 
 Nationscape [@nationscape_cit] is a survey conducting 500,000 interviews of 
 Americans from July 2019 through December 2020, covering the 2020 presidential
 election. The survey includes online interviews with roughly 6,250 people per week 
-starting July 10, 2019. This is the survey used to fit both models.
+starting July 10, 2019. 
 
 As in almost all contemporary survey research, the Nationscape survey is
 not a random sample of the population of interest. In particular, the Nationscape
 survey is a convenience sample 
 selected on a set of demographic criteria by a market research platform that 
 runs an online exchange for survey respondents. Such samples where 
-provided by the market research company Lucid. 
+provided by the company Lucid. 
 
 With this description we can classify this survey as an online 
-non-probability sample. At its core a non-probability sample is obtained
-by non-random selection. This contrasts with probability
-samples, where, a full list of the target population
+non-probability sample. At its core, what this means is that the sample is obtained
+by non-random selection, or a selection without the use of probability. 
+This contrasts with probability samples, where, a full list of the target population
 is available from which respondents are selected uniformly at random, although 
-the method for random sampling may vary depending on the study.
+the exact method may vary depending on the study. In this case
+the population would be Americans 18 years or older.
 
 The survey is divided into two phases. Phase 1 of the data, released in 
 January of 2020, includes approximately 156,000 cases collected over
@@ -97,55 +99,69 @@ January of 2020, includes approximately 156,000 cases collected over
 of December 26, 2019. Phase 2 of the data, released in September of 2020, 
 includes a re-release of Phase 1 data and new data from January 2020 to 
 July 2020 (Phase 2 data). Each weekly survey is released as its own data set, and
-combining all data set results in 318,697 cases.
+combining all data set results in 318,697 cases. To access the survey data one 
+must request access by means of the Voter Study Group website.[^1]
+
+[^1]: Data: https://www.voterstudygroup.org/publication/nationscape-data-set
 
 ## 2.2 ACS Census Data Set
 
 The American Community Surveys (ACS) [@acs_cit] is a project of the U.S. 
 Census Bureau that has replaced the decennial census as the key source of 
 information about American population and housing characteristics. This survey
-has been conducted since 2000 and the most recent on 2018. We used the 2018 
-version as our poststratification data set. 
+has been conducted since 2000 and the most recent on 2018. An important distinction
+is that the ACS is a sample and not a full census data set. 
 
-An account from IPUMS USA is required to access the data. The database allows
-for the creation of a customized data set. In particular we chose the 
+To be specific the ACS survey is sent to a sample of addresses (about 3.5 million) 
+in the 50 states, District of Columbia, and Puerto Rico and it is 
+conducted every month, every year. The Master Address File (MAF) is the
+Census Bureau’s official inventory of known housing units in the United States 
+and Puerto Rico. It serves as the source of addresses and hence sampling frame
+for the ACS. Their sampling process is a complicated 2 phase process but in 
+summary first they assign addresses to sixteen sampling strata, then determine 
+base rate and calculate stratum sampling rates and finally systematically select sample.
+In conclusion the ACS is a probability sample.
+
+To access the ACS surveys an account from IPUMS USA website is required[^2].
+The database allows for the creation of a customized data set. In particular we chose the 
 2018 ACS survey and selected the following variables: sex, age, state, race,
-and hispanic. Automatically ten other variables are appended to the selection.
+and Hispanic. Justification for the choosing of these variables can be found
+in the "Model" section. Automatically ten other variables are appended to the selection.
 Out of these ten there is one in particular that was also used. According to the
 ACS code book, "PERWT indicates how many persons in the U.S. population are 
 represented by a given person in an IPUMS sample." We use this variable in 
 the poststratification step to obtain better population estimates.
 
+[^2]: Data: https://usa.ipums.org/usa/
+
 ## 2.3 Methodology
 
-To train our models we used data from June 2020, since this are the closest 
-to the elections. Moreover, it is well known that political views have shifted 
-because of the U.S. treatment of the pandemic and therefore surveys conducted in
-2019 and early 2020 do not take this important topic into consideration. 
+To train our models we used the Nationscape surveys conducted in the month of June 2020, 
+since this are the closest surveys to the elections. 
+We do not consider surveys conducted in 2019 and early 2020 since
+it is well known that political views have shifted 
+because of the U.S. treatment of the pandemic.
 The resulting data set contained $20,157$ entries. Next we
-selected the columns for: sex, age, state, race, hispanic and vote choice. 
-This resulted in a rectangular data set of $20,157$ rows and $6$ columns.
+selected the columns for: sex, age, state, race, Hispanic origin and vote choice.
+To match our ACS selection. This resulted in a rectangular data set of $20,157$ rows and $6$ columns.
 
-To clean the data we first removed $333$ rows with missing values. Then we 
+To clean the data we first removed rows with missing values. Then, we 
 applied the common method of data binning to the age column. We created seven
 age groups that range from $18$ to $93$. A similar procedure was used for the 
-race category where we reduced the number of race categories. The hispanic 
-category was transformed into a binary feature, either 'hispanic' or 'not hispanic'.
+race category where we reduced the number of categories. The Hispanic origin 
+column was transformed into a binary feature, either 'Hispanic' or 'Not Hispanic'.
 The same procedure was done on the vote choice column where we used only data 
 which contained 'Joe Biden' or 'Donald Trump' as values.
 
-The ACS data set followed a very similar cleaning procedure. We first selected
+The ACS data set followed an almost identical cleaning procedure. First we selected
 the study columns, created and categorized age into age groups, reduced the number
-the race categories, and transformed the hispanic column to a binary variable.
-We performed this cleaning procedure while being consistent with the values of
-used in the Nationscape data set. Variable renaming was used for this purpose.
+the race categories, and transformed the Hispanic origin column to a binary variable.
+The only difference is that we performed this cleaning procedure while being 
+consistent with the category values used in the Nationscape data set.
 
-Proportions for each variable can be seen in Figure 1 and 2. Overall the 
-sample represents very well the distributions for race, gender, and hispanics.
-However, there are some noticeable inconsistencies on the distribution of age 
-groups and state population. This issue is solved by the poststratification
-step of our model. 
-
+Figure 1 and Figure 2 are visualization of the cleaned data we worked with. 
+The important thing to notice is that the sample appears to be fairly 
+representative of the population.
 
 ```{r raw-data, eval=FALSE, include=FALSE}
 # Sex, Age, State, Hispanic, Race
@@ -221,7 +237,7 @@ save(state_plot, file="../data/state_plot_data.rda")
 save(plot_data, file='../data/plot_data.rda')
 ```
 
-```{r raw-data-plot, fig.height=6, fig.width=8, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape Raw data', warning=FALSE}
+```{r raw-data-plot, fig.height=5, fig.width=8, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape Data Measured by Proportions', warning=FALSE}
 #scale_y_continuous(breaks=c(0, .25, .5, .75, 1), 
 #                     labels = c('0%', '25%', '50%', '75%', '100%'))
 
@@ -252,7 +268,7 @@ ggplot(data=plot_data, aes(x=as.factor(CAT),
         strip.background = element_rect(fill='grey92'))
 ```
 
-```{r state-plot, fig.height=5, fig.width=9, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape Raw Data ', warning=FALSE}
+```{r state-plot, fig.height=5, fig.width=9, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape State Proportions', warning=FALSE}
 load('../data/state_plot_data.rda')
 ggplot(data=state_plot, aes(x=as.factor(CAT), 
                            y=prop, group=as.factor(TYPE), 
@@ -263,9 +279,9 @@ ggplot(data=state_plot, aes(x=as.factor(CAT),
   theme_bw() + 
   scale_fill_manual(values = c('#1f78b4', '#33a02c', '#e31a1c', '#ff7f00',
                                '#8856a7'), guide=FALSE) +
-  scale_y_continuous(breaks=c(0, .025, 0.05, 1), 
-                     labels = c('0%', '2.5%', '5%','100%'),
-                     expand = c(0,0), limits = c(0, .06)) +
+  scale_y_continuous(breaks=c(0, .05, .1, .15, 1), 
+                     labels = c('0%', '5%', '10%', '15%','100%'),
+                     expand = c(0,0), limits = c(0, .15)) +
   scale_alpha_manual(values=c(1, .3)) +
   ylab('Proportion') + 
   labs(alpha='') +
@@ -282,63 +298,322 @@ ggplot(data=state_plot, aes(x=as.factor(CAT),
 ```
 \pagebreak
 
-# 3. Model
-## 3.1 Multilevel Regression and Poststratification
-To transform the Nationscape convenience sample into accurate estimates of voter
-intent, we make use of demographic information provided by respondents, then we
-poststratify raw responses to mimic a representative sample of likely voters.
-The core idea of MRP is to
-partition the population into cells based on combinations of various demographic
-attributes. Next, use the sample to fit a model which is then used to generate
-estimate the response variable within each cell. Finally, we aggregate the 
-cell-level estimates up to a population-level estimate by correcting each cell
-using the relative proportion in the population.
-
-The statistical technique MRP or multilevel regression and poststratification
+# 3 Model
+## 3.1 Multilevel Regression and Poststratificatio
+The statistical technique known as MRP or multilevel regression and poststratification
 [@little_1993; @park_gelman_bafumi_2004] allows researchers to infer 
 quantities in the population from a sparse and/or non-representative sample 
 [@wang_rothschild_goel_gelman], accomplished by combining two techniques:
-small-area estimation and nonresponse adjustment [@kennedy2020]. Furthermore,
+small-area estimation (model) and non-response adjustment (poststratification) [@kennedy2020]. Furthermore,
 MRP is widely used in the political science literature and has been proven
-to be an effective technique for non-probability based convenience samples, and
-the reason why we choose this technique as our main analysis tool.
+to be an effective analysis technique for non-probability based samples like 
+the Nationscape survey.
 
-Applying MRP in our setting comprises of the two mentioned steps. However, being
-specific to our problem, first, we fit a Bayesian hierarchical model to obtain
-estimates for our poststratification cells; second, we average over the 
-cells, weighting the values by its relative proportion to the population. To 
-generate the cells we consider all possible combinations of gender (2 categories),
+Therefore, to transform the Nationscape convenience sample into accurate estimates of voter
+intent, we make use of demographic information provided by respondents and
+poststratify raw responses to mimic a representative sample of likely voters.
+
+Before applying MRP we need to prepare what's referred to in the literature as the
+poststratification **cells** which comprises of all possible combinations
+of the categories found in the model's variable inputs. In our case we will be 
+considering the following variables for our model: gender, age, race, Hispanic origin
+and state. The reason we use these is because of their proven efficacy 
+in predicting political ideology. There are many examples in the literature but
+some of the ones we take inspiration from are 
+@ghitza_gelman_2013, @wang_rothschild_goel_gelman and @ghitza_gelman_2020.
+
+To generate the cells we consider all possible combinations of gender (2 categories),
 Hispanic origin (2 categories), age (7 categories), race (6 categories) and state (51 categories), 
 thus partitioning the data into `r 2*2*7*6*51` cells.
-
-We fit a multilevel regression model relating Biden support with age, race, 
+Applying MRP in our setting comprises of two steps: first, we fit a Bayesian hierarchical model 
+relating Joe Biden support with age, race, 
 Hispanic origin and state. Symbolically, for an individual $i$ we denote
 $y_i=1$ if the respondent support Joe Biden in the upcoming elections, and
-$0$ otherwise. The non-hierarchical part of the model can be written as
+$0$ for Donald Trump. The non-hierarchical part of the model can be written as
 \[P(y_i=1)=\text{logit}^{-1}(\beta X_i)\]
-where $X$ contains indicator variables for gender and Hispanic origin and an
-interaction term with age and race. Adding the varying intercept, the final model
+where $X_i$ contains indicator variables for gender and Hispanic origin and
+interaction terms for age and race. Adding the varying intercept (state), the final model
 can be written as
 \[P(y_i=1)=\text{logit}^{-1}\left(\beta X_i +\alpha_{j[i]}^{\text{state}}\right)\]
 \[\alpha^{\text{state}}\sim N(0, \sigma_{\text{state}})\]
+We use this model to obtain estimates for our poststratification cells. In the second step, 
+we average over the cells, weighting the values by its relative proportion to the population.
 
 To implement this model we use the **brms** [@brms_cit] package for the 
 R [@rcit] language. One important aspect of the Bayesian framework is the selection
 of priors. By default brms normalizes and re-scales the data and sets priors that
-reflect this transformation, this will be our prior of choice.
+reflect this transformation, this default was our prior of choice.
 
 ## 3.2 Stacked Regression and Poststratification
 
-[@buttice_highton_2017]
+As discussed in the previous section MRP has enabled a flowering of 
+new research in the social sciences, however the method has its own downsides.
+An example is from @buttice_highton_2017 where they argue that the model performs
+poorly in a number of empirical applications, specifically when the first-stage
+model is a poor fit for the public opinion of interest. The authors discuss that 
+MRP performs better when there is a greater geographic heterogeneity in opinion.
 
-# 4. Results
+```{r vote-dist, echo=FALSE}
+supp <- sum(sample$vote_2020)/length(sample$vote_2020)
 
-# 5. Discussion
+vote_intentions <- data.frame(candidate = c('Joe Biden', 'Donald Trump'),
+                              prop = 100 * c(supp, 1-supp) )
+knitr::kable(vote_intentions, 
+             caption='Distribution of Vote Intention in Nationscape Survey',
+             col.names = c("Candidate", "Proportion (%)"),
+             align = 'lr', digits = 1)
+```
+
+Table 1 is included in this section to better point out the limitations of using MRP. 
+Notice that the distribution is very uniform, almost 50-50, which potentially could
+cause a poorer fit of our MRP model. The researcher @ornstein 
+recently proposed a solution to this limitation. In his paper, he 
+introduces a technique called Stacked Regression and Poststratification (SRP).
+In this technique, rather than estimating using a single multilevel regression model, SRP
+generates predictions from a "stacked" ensemble of models, including 
+regularized regression, k-nearest neighbors, random forest, and gradient boosting.
+All popular machine learning algorithms. Then, poststratify by weighting 
+these predictions as one would do in MRP.
+
+To understand stacked ensembling one must recall that the majority of classification models
+are functions that do not explicitly output discrete variable. Instead they output a 
+probability that a given input belongs to a certain category, then a decision
+function translates this probability into an actual discrete prediction. What 
+stacked ensembling does is to combine multiple learning algorithms, called base 
+classifiers, and use the outputs, or probabilities, as inputs to train another 
+algorithm called the meta-classifier [@Breiman1996; @SuperLearner].
+
+For our purpose we used the following base classifiers: k-nearest neighbors, 
+random forest, support vector machine; and regularized logistic regression (LASSO)
+as our meta-classifier. This is very similar to what @ornstein used in his 
+paper, however we do not use gradient boosting to try an minimize computational 
+time. Instead, our method to try and break linearity is by training a support vector
+machine. If the reader is unfamiliar with any of these learning algorithms
+we recommend consulting @hastie_friedman_tisbshirani_2017.
+
+We used the stacked ensemble algorithm implementation from the **mlxtend** package
+[@raschkas_2018_mlxtend] for the Python version 3 language [@python_cit]. 
+Similarly we used the implementations for our base classifiers found in the 
+**scikit-learn** package [@scikit-learn]. To find the optimal parameters we used 
+a grid search algorithm, which is essentially a brute force approach that 
+given a range of parameters it tries them all and finds the optimal combinations.
+As the original author describes one huge limitation of SRP is the 
+computational cost. We used a free-tier Google cloud instance to train the model
+which took approximately 32 minutes to train compared to our MRP model which
+took less than 5 minutes to fit.
+
+
+# 4 Results
+```{r election-results, echo=FALSE}
+mrp_estimates <- data.frame(candidate = c('Joe Biden (Democratic)', 'Donald Trump (Republican)'),
+                            prop = 100*c(mean(mrp.forecast$mean), 1-mean(mrp.forecast$mean)),
+                            lower= 100*c(quantile(mrp.forecast$mean, 0.025), 
+                                         quantile(1-mrp.forecast$mean, 0.025)),
+                            upper= 100*c(quantile(mrp.forecast$mean, 0.975), 
+                                         quantile(1-mrp.forecast$mean, 0.975))
+                            )
+
+srp_estimates <- data.frame(candidate = c('Joe Biden (Democratic)', 'Donald Trump (Republican)'),
+                            prop = 100*c(mean(srp.forecast$X0), 1-mean(srp.forecast$X0)),
+                            lower= 100*c(quantile(srp.forecast$X0, 0.025), 
+                                         quantile(1-srp.forecast$X0, 0.025)),
+                            upper= 100*c(quantile(srp.forecast$X0, 0.975), 
+                                         quantile(1-srp.forecast$X0, 0.975))
+                            )
+
+# To avoid confusion this variable is used to compute win by states in the map plots
+mrp.states <- ifelse(mrp.forecast$mean > .5, 1, 0)
+srp.states <- ifelse(srp.forecast$X0 > .5, 1, 0)
+
+knitr::kable(mrp_estimates,
+             col.names=c("Candidate", "**Popular Vote (%)**", "Lower Quantile (%)", "Upper quantile (%)"),
+             digits=2, caption='MRP Forecast of Percentage of Popular Vote at 95% Confidence',
+             align = 'lccr')
+
+knitr::kable(srp_estimates,
+             col.names = c("Candidate", "**Popular Vote (%)**", 
+                           "Lower Quantile (%)", "Upper quantile (%)"),
+             digits = 2, caption='SRP Forecast of Percentage of Popular Vote at 95% Confidence',
+             align = 'lccr')
+```
+
+As per the titles Tables 2 and 3 display our predictions for popular vote proportions. 
+As can be seen both models forecast a popular vote victory for
+the democratic party in the U.S. Presidential elections. 
+Similarly 95% confidence intervals are included in the tables. 
+This means that there is a $95$% probability that the true
+popular votes proportion lies between the lower quantile and the upper quantile.
+
+Similarly we estimated the percentage of popular votes per state using both models.
+Based on these results we created Figure 3, these maps show what
+we expect to be the states won by the democrats and the republicans. The MRP
+model estimates a total of `r sum(mrp.states)` states for the democrats and
+`r 51-sum(mrp.states)` for republicans. Similarly the SRP model estimates `r sum(srp.states)` states 
+for the democrats and `r 51-sum(srp.states)` for republicans. A table containing
+the explicit predictions of popular vote proportions for each state can be found in the 
+Appendix. 
+```{r by-state, echo=FALSE, fig.height=8.5, fig.width=6, fig.align="center", echo=FALSE, fig.cap='Forecast of State Victories', warning=FALSE}
+mrp_plt <- mrp.forecast %>% 
+  mutate(bwin = ifelse(mean > .5, 1, 0)) %>% 
+  rename(state_abbv=state) %>% 
+  left_join(urbnmapr::states, by="state_abbv") %>% 
+  ggplot(aes(x=long,y=lat,group=group,fill=bwin)) +
+  geom_polygon(col="#ffffff") +
+  scale_fill_gradient(low='red2' ,high='royalblue4') +
+  theme_light()+
+  ylab("") + xlab("") +
+  labs(title="MRP Model 2020 U.S. Election Forecast",
+       subtitle='Blue denotes democratic win and red a republican win.') +
+  theme(legend.position = "none",
+        plot.title = element_text(size=14, hjust=0.5,vjust=-2, color='black'),
+        plot.subtitle=element_text(size=12, hjust=0.5, vjust=-107, face="italic", color="black"))
+
+srp_plt <- srp.forecast %>% 
+  mutate(bwin = ifelse(X0 > .5, 1, 0)) %>% 
+  rename(state_abbv=state) %>% 
+  left_join(urbnmapr::states, by="state_abbv") %>% 
+  ggplot(aes(x=long,y=lat,group=group,fill=bwin)) +
+  geom_polygon(col="#ffffff") +
+  scale_fill_gradient(low='red2' ,high='royalblue4') +
+  theme_light()+
+  ylab("") + xlab("") +
+  labs(title="SRP Model 2020 U.S. Election Forecast",
+       subtitle='Blue denotes democratic win and red a republican win.') +
+  theme(legend.position = "none",
+        plot.title = element_text(size=14, hjust=0.5,vjust=-2, color='black'),
+        plot.subtitle=element_text(size=12, hjust=0.5, vjust=-102, face="italic", color="grey21"))
+
+plot_grid(mrp_plt, srp_plt, nrow=2, ncol=1)
+```
+
+
+```{r}
+elec.college <- read.csv('../elec_college.csv')
+
+mrp.elec.college <- elec.college %>% 
+  left_join(mrp.forecast, by='state') %>% 
+  mutate(bidenw = ifelse(mean > .5, 1, 0)) %>% 
+  mutate(biden_votes = bidenw * electoral.votes)
+
+srp.elec.college <- elec.college %>% 
+  left_join(srp.forecast, by='state') %>% 
+  mutate(bidenw = ifelse(X0 > .5, 1, 0)) %>% 
+  mutate(biden_votes = bidenw * electoral.votes)
+```
+
+\pagebreak
+
+# 5 Discussion
+
+```{r college, echo=FALSE}
+# The Economist estimates
+# https://projects.economist.com/us-2020-forecast/president
+electoral.votes <- data.frame(candidate=c('Joe Biden (Democrat)', 'Donald Trump (Republican)'),
+                              mrp = c(sum(mrp.elec.college$biden_votes), 538-sum(mrp.elec.college$biden_votes)),
+                              srp = c(sum(srp.elec.college$biden_votes), 538-sum(srp.elec.college$biden_votes)),
+                              economist = c(350, 188))
+
+knitr::kable(electoral.votes, col.names = c("Candidate", "**MRP Estimate**", "**SRP Estimate**", "The Economist"),
+             caption="Estimated Number of Electoral Votes.", align='lccr')
+```
+
+It is necessary, before our discussion, to comment on the U.S. electoral system 
+since for the average non-American this might not be well know information. 
+Contrary to popular belief the president of the United States is not elected by
+popular vote. On election day, when Americans vote for president they are actually voting for
+whom their state will vote for. The U.S. is the only country that picks its president
+using process called the **Electoral College**. The Electoral College process 
+consists of the selection of the electors, the meeting of the electors where 
+they vote for President and Vice President, and the counting of the electoral 
+votes by Congress. There are a total of 538 electors. A majority of 270 electoral 
+votes is required to elect the President.
+
+With this in mind we must clarify that even if our estimates show that
+Joe Biden will win the popular vote it is perfectly possible for Donald Trump
+to be re-elected as president. In fact, during the 2016 elections Donald Trump
+lost the popular vote to Hillary Clinton but won the election by majority of
+electoral votes. 
+
+Looking at Figure 3, perhaps the most noticeable difference between the 
+MRP predictions and SRP are the states near Florida. In the 2016 elections
+Donald Trump won this state and it is a major cause of uncertainty for our
+predictions. Looking at other well known pollsters, like "The Economist[^3]" and 
+"The New York Times[^4]" we noticed that the states that have the greatest uncertainty
+are Florida, Georgia, South and North Carolina, Texas, Ohio and Iowa. 
+
+[^3]: Source: https://projects.economist.com/us-2020-forecast/president
+[^4]: Source: https://www.nytimes.com/live/2020/presidential-polls-trump-biden?action=click&module=styln-elections-2020-guide&variant=show&state=default&pgtype=LegacyCollection&region=hub&context=storyline_election_guide
+
+We agree with these entities that perhaps it is a tossup for Florida, Georgia,
+South and North Carolina. Furthermore, we question if our models are accurately
+predicting the outcome for Texas which is another state that Donald Trump won 
+in the 2016 elections. However, we are confident in the predictions for 
+Ohio and Iowa. 
+
+Most States have a “winner-take-all” system that awards all 
+electors to the Presidential candidate who wins the state's popular vote. 
+If we make the assumption that all states will follow this system then our model
+estimates help create an even stronger estimate. In Table 4 our forecast for number
+electors can be found. We present Table 4 in this
+section since we are making a big assumption to generate these estimates. Moreover,
+this forecast is not part of our raw estimates which are presented in the previous
+section. 
+
+We would like to point out that there is no way to quantify what
+each state's elector system will be and therefore there is no method available
+to present explicit bounds of error as we did in the previous section. It is for 
+this reason that we have provided the estimates of a well known pollster "The Economist"
+to compare this forecast to a more statistically backed one. 
+Furthermore, we can comment on Table 4 results as broad estimates since, as stated, most state
+do follow a winner takes all system. If this is the case, like in the 
+2016 elections where 48 states and the District of Columbia followed this system
+then we could confidently forecast that the majority of electoral votes, 
+at least 270, will go to the democratic party candidate, Joe Biden.
+
+Finally recall that in 2016, months of national polls confidently showed Hillary Clinton 
+ahead, and set many Americans up for a shock on Election Nigh. Two particular 
+pollsters Arie Kapteyn and Robert Cahaly who accurately predicted
+Donald Trump's victory in 2016 theorize that the reason why this happens is 
+because of “shy” Trump voters. They describe them as "...people reluctant to share 
+their opinions for fear of being judged" and continue by stating that "there’s a 
+lot of hidden Trump votes out there”, and they could make the difference 
+in the upcoming elections [@stanton_2020].
+
+It is the next statement by Cahaly that calls for future work in this research
+area, “Will Biden win the popular vote? Probably. I’m not even debating 
+that. But I think Trump is likely to have an Electoral College victory.” 
+Fundamentally, based on this theory, the problem is that polls are non-representative of Trump's
+support. A large of portion of our paper was devoted to explain how multilevel 
+modeling and poststratification is a great tool to accurately estimate population
+parameters when the sample is non-representative of the population. This case
+is no exception and further work should be devoted to more accurately estimating
+Trump's support in the United States.
 
 
 \pagebreak
 
 # Appendix
+
+All code used to generate this results can be found here:
+
+* LINK
+
+## Predictions by State
+```{r}
+to.present <- mrp.forecast %>% 
+  select(state, mean) %>% 
+  left_join(srp.forecast, by='state')
+
+to.present$mean <- to.present$mean * 100
+to.present$X0 <- to.present$X0 * 100
+
+to.present %>% 
+  knitr::kable(col.names=c("State", "MRP Estimate (%)", "SRP Estimate (%)"),
+               caption="Models Forecast of Popular Vote Proportion by State",
+               digits = 2,
+               align = 'lcr')
+```
+
 
 \pagebreak
 
