@@ -14,7 +14,7 @@ warnings.simplefilter('ignore')
 
 
 def get_data(df, train=True):
-    """TODO: Add description"""
+    """Converts data in dataframe to numpy array comprised of one-hot vectors"""
     # Encode all categorical variables
     encoder = OneHotEncoder()
     encoder.fit(df[['age', 'gender', 'hispanic', 'race_ethnicity', 'state']])
@@ -30,7 +30,7 @@ def get_data(df, train=True):
 
 
 def fit_model(X, y, n_jobs=1):
-    """TODO: Add description
+    """Fits the Stacking model
 
     Warning: This function takes aprox. 25 min to run
     """
@@ -63,7 +63,7 @@ def fit_model(X, y, n_jobs=1):
 
 
 def display_metrics(grid):
-    """TODO: Add description"""
+    """To add verbosity for the model"""
     cv_keys = ('mean_test_score', 'std_test_score', 'params')
 
     for r, _ in enumerate(grid.cv_results_['mean_test_score']):
@@ -76,7 +76,7 @@ def display_metrics(grid):
 
 
 def get_post_strat_table(df):
-    """TODO: Add description"""
+    """Creates poststratification cells as a table"""
     table = pd.pivot_table(df, values='perwt', index=['age', 'gender', 'hispanic', 'race_ethnicity', 'state'],
                            dropna=True, aggfunc=np.sum)
 
@@ -89,7 +89,7 @@ def get_post_strat_table(df):
 
 
 def srp_forecast(table, predictions):
-    """TODO: Add description"""
+    """Poststratify estimates and return final predictions"""
     table['predictions'] = predictions
     table['predictions_prop'] = table['predictions'] * table['prop']
 
@@ -100,10 +100,44 @@ def srp_forecast(table, predictions):
     return p / w
 
 
-@ click.command()
-def main():
-    """TODO: Add description"""
-    pass
+@click.command()
+@click.option('--n-workers', default=1, help="Number of concurrent processes to use for training the model")
+@click.option('--train', required=True, help='Relative or full path to training data')
+@click.option('--post', required=True, help='Relative or full path to poststratifying data')
+def main(n_workers, train, post):
+    """Given training data and poststratification data this script
+    fits the SRP Model and outputs poststratified predictions.
+
+    WARNING: This script may more than 30 min to finish.
+    """
+
+    # Gather training data and convert to one-hot matrix
+    traind = pd.read_csv(train)
+    X, y = get_data(traind, train=True)
+
+    # Train model
+    model = fit_model(X, y, n_jobs=n_workers)
+
+    # Output model metrics
+    display_metrics(model)
+
+    # Gather Poststratification data
+    post = pd.read_csv(post)
+
+    # Cells for poststratification
+    table = get_post_strat_table(post)
+
+    # Get one-hot matrix to pass into model
+    X_pred = get_data(post, train=False)
+
+    # Generate base estimates
+    predictions = model.predict(X_pred)
+
+    # Generate poststratified predictions
+    forecast = srp_forecast(table, predictions)
+
+    # Save to csv file
+    forecast.to_csv('spr_forecast.csv')
 
 
 if __name__ == "__main__":
