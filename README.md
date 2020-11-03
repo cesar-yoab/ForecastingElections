@@ -145,3 +145,15 @@ you ran the previous commands you may have to change paths in the code chunks, t
 specific case. After you've done this click "Knit" and this should generate the report.pdf file.
 We set this as an optional step since the full report is available as a pdf in this repository by
 default.
+
+### Final Thoughts
+All python scripts except for "electoral_college.py" have a "help" functionality
+you can view it by running 
+
+```bash
+python3 SCRIPTNAME --help
+```
+
+In case you find a bug in the code please file an "Issue" report and I will look into it
+ASAP. If you find a solution to the bug don't hesite to make a pull request and I will 
+be happy to merge it to the main branch after reviewing it, all contributions are welcomed!

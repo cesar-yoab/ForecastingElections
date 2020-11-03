@@ -9,9 +9,7 @@ FEATURES_OF_INTEREST = ['age', 'gender', 'hispanic',
 
 
 def clean_downloaded_data(dirpath, csvname):
-    """
-    TODO: Add more here 
-    """
+    """Unzips and cleans data"""
     # Create data frame
     df = create_df(dirpath)
 
