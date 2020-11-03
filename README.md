@@ -1,4 +1,4 @@
-# 2020 US Presidential Elections Forecast
+# Forecasting Elections
 
 This repository contains all the code used to generate our
 presidential elections forecasts. To accomplish this we used the
@@ -7,7 +7,7 @@ and stack regression and poststratification (SRP). We used
 the Democracy Fund + UCLA Nationscape Survey data to fit our models
 and the ACS census data to poststratify our estimates. 
 
-## Forecast
+# 2020 U.S. Presidential Elections Forecast
 Both our models estimate Joe Biden to win the popular vote. The table below shows our estimates.
 
 ### Forecast of Popular Vote Proportions:
