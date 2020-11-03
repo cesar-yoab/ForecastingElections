@@ -1,3 +1,4 @@
+![Elections](./util/election.png)
 # Forecasting Elections
 
 This repository contains all the code used to generate our
@@ -37,7 +38,7 @@ like systems, please use the equivalent Windows commands if that is your operati
 
 ### Prerequisites
 In order to reproduce our results it is important that you have installed R and Python 3.
-A requirements.txt file can be found in this repository listing all libraries used, we recommend you create 
+A requirements.txt file can be found in this repository listing all libraries used, we recommend you create a
 python environment to run all our code. You can do this by running the following commands in a terminal
 
 ```bash
@@ -67,7 +68,7 @@ at the bottom of the page enter your information to request acces to the
 data set. We warn you that this may take days and you may not be granted 
 permision if you provide an email that is not afiliated to 
 an academic institution. When the download is completed move this
-file inside of the cloned repository and run the following commands
+file to the cloned repository and run the following commands
 
 ```bash
 mkdir data
@@ -157,3 +158,5 @@ python3 SCRIPTNAME --help
 In case you find a bug in the code please file an "Issue" report and I will look into it
 ASAP. If you find a solution to the bug don't hesite to make a pull request and I will 
 be happy to merge it to the main branch after reviewing it, all contributions are welcomed!
+
+Icons made by <a href="https://www.flaticon.com/free-icon/election_1902067" title="smalllikeart">smalllikeart</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
