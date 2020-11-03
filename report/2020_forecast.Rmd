@@ -7,10 +7,10 @@ fontsize: 12pt
 sansfont: Calibri Light
 bibliography: references.bib
 abstract: |
-  In this paper develop two models with the purpose of forecasting the 
+  In this paper we develop two models with the purpose of forecasting the 
   2020 United States presidential election. Multilevel regression with 
   postratification (MRP) and Stacked regression with postratification models
-  where constructed using the Nationscape survey and postsratified using the ACS
+  where constructed using the Nationscape survey and postsratified using the 2018 ACS
   census dataset. We conclude by forecasting the victory of Joe Biden
   in the popular vote and commenting on the high likelihood of winning the
   electoral college process.
@@ -37,12 +37,12 @@ poststrat <- read.csv('../data/post-strat.csv') # ACS data after cleaning
 It is a common theme in the social sciences and statistics literature to 
 attempt constructing a model that accurately predicts the outcome of a presidential
 election. Often the purpose of these experiments ranges from finding a novel 
-statistical model to a commentary of the impact at the economical, social or 
-political level that the expected winner would cause. 
+statistical model to a commentary of the impact the winner could cause at the economical, social or 
+political level. 
 All such experiments, however, share the same underlying problem, predicting
 the outcome of the elections.
 
-As Pablo Hiriat writes in his article for "El Financiero", the future of world's politics will be decided on
+As Pablo Hiriat writes in his article for "El Financiero", the future of the world's politics will be decided on
 November 3rd in the 2020 United States presidential elections.
 @isidore_2020 discusses how the U.S. elections are now 
 the most bet-on event in history. As of Wednesday morning, a week prior to the 
@@ -51,14 +51,14 @@ Betfair Exchange is one of the largest betting exchanges in the world based on L
 author continues by predicting this figure to grow close to $500 million USD.
 
 It seems now more than ever this years elections carry with
-them greater level of importance, and in this paper we attempt to forecast the
+them a greater level of importance, and in this paper we attempt to forecast the
 percentage of popular votes that will appear in the screens of many Americans
 on November 3rd.
 To accomplish this two methods are used, a multilevel regression and poststratification
 (MRP) model and a stacked regression and poststratification model (SRP). To
 fit the models we used the Democracy Fund + UCLA Nationscape survey data set
 and, since this survey is a non-probability sample, to obtain accurate
-estimates we poststratify our predictions using the ACS U.S. census data set. 
+estimates we poststratify our predictions using the 2018 ACS census data set. 
 
 This paper is structured in the following manner. Section two contains commentary
 on both data sets, what they are and where they come from, here we also 
@@ -66,7 +66,7 @@ explain what is meant by a non-probability sample. This is followed by
 a brief discussion on our data cleaning methodology. In section three we 
 elaborate on how MRP and SRP work and how they are implemented to generate predictions.
 Section four is where we present our estimates for both models and finally in section
-five we comment on this estimates and comment on the most likely winner of the 
+five we comment on our results and on the most likely winner of the 
 U.S. presidential election, Joe Biden.
 
 # 2 Data
@@ -98,7 +98,7 @@ January of 2020, includes approximately 156,000 cases collected over
 24 weeks, beginning from the week of July 18, 2019 and concluded with the week
 of December 26, 2019. Phase 2 of the data, released in September of 2020, 
 includes a re-release of Phase 1 data and new data from January 2020 to 
-July 2020 (Phase 2 data). Each weekly survey is released as its own data set, and
+July 2020. Each weekly survey is released as its own data set, and
 combining all data set results in 318,697 cases. To access the survey data one 
 must request access by means of the Voter Study Group website.[^1]
 
@@ -108,24 +108,24 @@ must request access by means of the Voter Study Group website.[^1]
 
 The American Community Surveys (ACS) [@acs_cit] is a project of the U.S. 
 Census Bureau that has replaced the decennial census as the key source of 
-information about American population and housing characteristics. This survey
-has been conducted since 2000 and the most recent on 2018. An important distinction
+information about the American population and its housing characteristics. This survey
+has been conducted since 2000 and the most recent sample released is from 2018. An important distinction
 is that the ACS is a sample and not a full census data set. 
 
-To be specific the ACS survey is sent to a sample of addresses (about 3.5 million) 
+Moreover, the ACS survey is sent to a sample of addresses (about 3.5 million) 
 in the 50 states, District of Columbia, and Puerto Rico and it is 
 conducted every month, every year. The Master Address File (MAF) is the
 Census Bureau’s official inventory of known housing units in the United States 
 and Puerto Rico. It serves as the source of addresses and hence sampling frame
 for the ACS. Their sampling process is a complicated 2 phase process but in 
 summary first they assign addresses to sixteen sampling strata, then determine 
-base rate and calculate stratum sampling rates and finally systematically select sample.
-In conclusion the ACS is a probability sample.
+base rate and calculate stratum sampling rates and finally systematically selecting samples.
+Hence, we can classify the ACS as a probability sample.
 
 To access the ACS surveys an account from IPUMS USA website is required[^2].
 The database allows for the creation of a customized data set. In particular we chose the 
 2018 ACS survey and selected the following variables: sex, age, state, race,
-and Hispanic. Justification for the choosing of these variables can be found
+and Hispanic origin. Justification for the choosing of these variables can be found
 in the "Model" section. Automatically ten other variables are appended to the selection.
 Out of these ten there is one in particular that was also used. According to the
 ACS code book, "PERWT indicates how many persons in the U.S. population are 
@@ -159,7 +159,7 @@ the race categories, and transformed the Hispanic origin column to a binary vari
 The only difference is that we performed this cleaning procedure while being 
 consistent with the category values used in the Nationscape data set.
 
-Figure 1 and Figure 2 are visualization of the cleaned data we worked with. 
+Figure 1 and Figure 2 are visualizations of the cleaned data we used for the models. 
 The important thing to notice is that the sample appears to be fairly 
 representative of the population.
 
@@ -239,7 +239,7 @@ save(state_plot, file="../data/state_plot_data.rda")
 save(plot_data, file='../data/plot_data.rda')
 ```
 
-```{r raw-data-plot, fig.height=5, fig.width=8, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape Data Measured by Proportions', warning=FALSE}
+```{r raw-data-plot, fig.height=5, fig.width=8, fig.align="center", echo=FALSE, fig.cap='ACS and Nationscape Data', warning=FALSE}
 #scale_y_continuous(breaks=c(0, .25, .5, .75, 1), 
 #                     labels = c('0%', '25%', '50%', '75%', '100%'))
 
@@ -311,10 +311,6 @@ MRP is widely used in the political science literature and has been proven
 to be an effective analysis technique for non-probability based samples like 
 the Nationscape survey.
 
-Therefore, to transform the Nationscape convenience sample into accurate estimates of voter
-intent, we make use of demographic information provided by respondents and
-poststratify raw responses to mimic a representative sample of likely voters.
-
 Before applying MRP we need to prepare what's referred to in the literature as the
 poststratification **cells** which comprises of all possible combinations
 of the categories found in the model's variable inputs. In our case we will be 
@@ -322,7 +318,9 @@ considering the following variables for our model: gender, age, race, Hispanic o
 and state. The reason we use these is because of their proven efficacy 
 in predicting political ideology. There are many examples in the literature but
 some of the ones we take inspiration from are 
-@ghitza_gelman_2013, @wang_rothschild_goel_gelman and @ghitza_gelman_2020.
+@ghitza_gelman_2013, @wang_rothschild_goel_gelman and @ghitza_gelman_2020. Other
+models were considered however since we use two techniques we tried to keep
+this part of the model as simple as possible.
 
 To generate the cells we consider all possible combinations of gender (2 categories),
 Hispanic origin (2 categories), age (7 categories), race (6 categories) and state (51 categories), 
@@ -339,12 +337,18 @@ can be written as
 \[P(y_i=1)=\text{logit}^{-1}\left(\beta X_i +\alpha_{j[i]}^{\text{state}}\right)\]
 \[\alpha^{\text{state}}\sim N(0, \sigma_{\text{state}})\]
 We use this model to obtain estimates for our poststratification cells. In the second step, 
-we average over the cells, weighting the values by its relative proportion to the population.
+we apply the poststratification technique.
+
+Poststratification, as briefly explained, is a popular method for correcting
+for known differences between sample and target populations. The idea is
+to partition the data into cells, as explained above, and aggregate
+cell-level estimates produced by the model up to a population-level estimate. This
+is done by weighting each cell by its relative proportion in the population.
 
 To implement this model we use the **brms** [@brms_cit] package for the 
 R [@rcit] language. One important aspect of the Bayesian framework is the selection
 of priors. By default brms normalizes and re-scales the data and sets priors that
-reflect this transformation, this default was our prior of choice.
+reflect this transformation, this default was our prior of choice. 
 
 ## 3.2 Stacked Regression and Poststratification
 
@@ -371,14 +375,14 @@ Notice that the distribution is very uniform, almost 50-50, which potentially co
 cause a poorer fit of our MRP model. The researcher @ornstein 
 recently proposed a solution to this limitation. In his paper, he 
 introduces a technique called Stacked Regression and Poststratification (SRP).
-In this technique, rather than estimating using a single multilevel regression model, SRP
+This technique, rather than estimating using a single multilevel regression model, SRP
 generates predictions from a "stacked" ensemble of models, including 
 regularized regression, k-nearest neighbors, random forest, and gradient boosting.
 All popular machine learning algorithms. Then, poststratify by weighting 
 these predictions as one would do in MRP.
 
 To understand stacked ensembling one must recall that the majority of classification models
-are functions that do not explicitly output discrete variable. Instead they output a 
+are functions that do not explicitly output discrete variables. Instead they output a 
 probability that a given input belongs to a certain category, then a decision
 function translates this probability into an actual discrete prediction. What 
 stacked ensembling does is to combine multiple learning algorithms, called base 
@@ -396,7 +400,7 @@ we recommend consulting @hastie_friedman_tisbshirani_2017.
 We used the stacked ensemble algorithm implementation from the **mlxtend** package
 [@raschkas_2018_mlxtend] for the Python version 3 language [@python_cit]. 
 Similarly we used the implementations for our base classifiers found in the 
-**scikit-learn** package [@scikit-learn]. To find the optimal parameters we used 
+**scikit-learn** package [@scikit-learn]. To find the optimal hyperparameters we used 
 a grid search algorithm, which is essentially a brute force approach that 
 given a range of parameters it tries them all and finds the optimal combinations.
 As the original author describes one huge limitation of SRP is the 
@@ -527,11 +531,11 @@ since for the average non-American this might not be well know information.
 Contrary to popular belief the president of the United States is not elected by
 popular vote. On election day, when Americans vote for president they are actually voting for
 whom their state will vote for. The U.S. is the only country that picks its president
-using process called the **Electoral College**. The Electoral College process 
+using a process called the **Electoral College**. The Electoral College process 
 consists of the selection of the electors, the meeting of the electors where 
 they vote for President and Vice President, and the counting of the electoral 
 votes by Congress. There are a total of 538 electors. A majority of 270 electoral 
-votes is required to elect the President.
+votes is required to elect the president.
 
 With this in mind we must clarify that even if our estimates show that
 Joe Biden will win the popular vote it is perfectly possible for Donald Trump
@@ -559,16 +563,17 @@ Most States have a “winner-take-all” system that awards all
 electors to the Presidential candidate who wins the state's popular vote. 
 If we make the assumption that all states will follow this system then our model
 estimates help create an even stronger estimate. In Table 4 our forecast for number
-electors can be found. We present Table 4 in this
+electoral votes can be found. We present Table 4 in this
 section since we are making a big assumption to generate these estimates. Moreover,
-this forecast is not part of our raw estimates which are presented in the previous
-section. 
+this forecast is not part of our raw estimates which are presented in the "Results"
+section.
+\pagebreak
 
 We would like to point out that there is no way to quantify what
 each state's elector system will be and therefore there is no method available
 to present explicit bounds of error as we did in the previous section. It is for 
 this reason that we have provided the estimates of a well known pollster "The Economist"
-to compare this forecast to a more statistically backed one. 
+to compare this forecast to a more politically backed one. 
 Furthermore, we can comment on Table 4 results as broad estimates since, as stated, most state
 do follow a winner takes all system. If this is the case, like in the 
 2016 elections where 48 states and the District of Columbia followed this system
@@ -590,7 +595,7 @@ that. But I think Trump is likely to have an Electoral College victory.”
 Fundamentally, based on this theory, the problem is that polls are non-representative of Trump's
 support. A large of portion of our paper was devoted to explain how multilevel 
 modeling and poststratification is a great tool to accurately estimate population
-parameters when the sample is non-representative of the population. This case
+parameters when the sample is non-representative. This case
 is no exception and further work should be devoted to more accurately estimating
 Trump's support in the United States.
 
@@ -601,7 +606,7 @@ Trump's support in the United States.
 
 All code used to generate this results can be found here:
 
-* LINK
+* https://github.com/cesar-yoab/ForecastingElections
 
 ## Predictions by State
 ```{r}
