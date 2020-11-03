@@ -110,6 +110,10 @@ def main(n_workers, train, post):
 
     WARNING: This script may more than 30 min to finish.
     """
+    try:
+        n_workers = int(n_workers)
+    except Exception:
+        n_workers = 1
 
     # Gather training data and convert to one-hot matrix
     traind = pd.read_csv(train)

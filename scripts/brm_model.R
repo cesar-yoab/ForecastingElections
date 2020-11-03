@@ -22,7 +22,6 @@ data$hispanic <- data$hispanic %>%
   mapvalues(from = c("Hispanic", "Not Hispanic"),
             to = c(1, 0))
 
-# find . -name '*.csv.gz' -print 0 | xargs -0 -n1 gzip -d
 
 # Second model had smooth training
 # Third model had 70 divergent transitions
