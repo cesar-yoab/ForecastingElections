@@ -57,7 +57,7 @@ US_STATE_CODES = {
 if __name__ == "__main__":
     elemsn = list()
 
-    with open('electoral_college.txt', 'r') as f:
+    with open('./util/electoral_college.txt', 'r') as f:
         for line in f:
             elemsn.append(line.rstrip())
 

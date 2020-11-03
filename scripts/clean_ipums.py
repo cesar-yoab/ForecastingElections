@@ -66,7 +66,7 @@ def get_keys():
     """Using the txt keys files returns a list with the codes for the wanted columns"""
     lines = list()
 
-    with open('../util/post_strat_keys.txt', 'r') as f:
+    with open('./util/post_strat_keys.txt', 'r') as f:
         running_str = ""
         for line in f:
             if line == '\n':

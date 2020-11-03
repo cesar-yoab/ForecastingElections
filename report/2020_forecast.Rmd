@@ -164,7 +164,8 @@ The important thing to notice is that the sample appears to be fairly
 representative of the population.
 
 ```{r raw-data, eval=FALSE, include=FALSE}
-# Sex, Age, State, Hispanic, Race
+# We only run this chunk once and after is not necessary.
+# Sex, Age, State, Hispanic, Race Generation of proportions to plot
 age_pop <- poststrat %>% 
   group_by(age) %>% 
   summarise(n = sum(perwt)) %>% 
@@ -233,6 +234,7 @@ state_plot$TYPE <- factor(state_plot$TYPE, levels = c("Nationscape", "ACS"))
 plot_data <- rbind(age, sex, race, hisp)
 plot_data$TYPE <- factor(plot_data$TYPE, levels=c("Nationscape", "ACS"))
 
+# Save plot data to generate plots
 save(state_plot, file="../data/state_plot_data.rda")
 save(plot_data, file='../data/plot_data.rda')
 ```
@@ -468,6 +470,7 @@ mrp_plt <- mrp.forecast %>%
         plot.title = element_text(size=14, hjust=0.5,vjust=-2, color='black'),
         plot.subtitle=element_text(size=12, hjust=0.5, vjust=-107, face="italic", color="black"))
 
+
 srp_plt <- srp.forecast %>% 
   mutate(bwin = ifelse(X0 > .5, 1, 0)) %>% 
   rename(state_abbv=state) %>% 
@@ -481,14 +484,16 @@ srp_plt <- srp.forecast %>%
        subtitle='Blue denotes democratic win and red a republican win.') +
   theme(legend.position = "none",
         plot.title = element_text(size=14, hjust=0.5,vjust=-2, color='black'),
-        plot.subtitle=element_text(size=12, hjust=0.5, vjust=-102, face="italic", color="grey21"))
+        plot.subtitle=element_text(size=12, hjust=0.5, vjust=-107, face="italic", color="grey21"))
+
 
 plot_grid(mrp_plt, srp_plt, nrow=2, ncol=1)
 ```
 
 
 ```{r}
-elec.college <- read.csv('../elec_college.csv')
+# You need to change this path to where your elec_college.csv file is located
+elec.college <- read.csv('../util/elec_college.csv')
 
 mrp.elec.college <- elec.college %>% 
   left_join(mrp.forecast, by='state') %>% 
